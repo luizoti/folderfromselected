@@ -2,17 +2,17 @@
 Type=Service
 X-KDE-ServiceTypes=KonqPopupMenu/Plugin
 MimeType=all/all;
-Actions=FolderFromSelected;FolderFromSelectedFast
+Actions=FolderFromSelected;FolderFromSelectedFast;
 X-KDE-AuthorizeAction=shell_access
 X-KDE-Priority=TopLevel
 
 [Desktop Action FolderFromSelected]
-Name=Nova pastas para seleção!
+Name=Nova pasta para seleção!
 Icon=Thunar
 Exec=/usr/bin/python3 /home/luiz/HD/posinstall/repos/folderfromselected/folderfromselected.py %F
 
 [Desktop Action FolderFromSelectedFast]
-Name=Nova pastas para seleção! - Rapido
+Name=Nova pasta para seleção! - Rapido
 Icon=Thunar
 Exec=/usr/bin/python3 /home/luiz/HD/posinstall/repos/folderfromselected/folderfromselected.py -f %F
 
