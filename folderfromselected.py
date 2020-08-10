@@ -1,14 +1,22 @@
 #!/usr/bin/python3
 
 import sys
-from os.path import basename, splitext
+import argparse
+from os.path import basename
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QPushButton, QWidget, QApplication, QLabel, QListWidget, QHBoxLayout, QVBoxLayout, QLineEdit
  
-class App(QWidget):
+parser = argparse.ArgumentParser(description='Create folder from selected files!')
 
+parser.add_argument('-g', '--gui', action='store_true', help='gui create folder')
+parser.add_argument('-f', '--fast', action='store_true', help='fast create folder')
+parser.add_argument('list', nargs='+', help='Set flag')
+args = parser.parse_args()
+
+
+class App(QWidget):
     def __init__(self):
-        super().__init__()
+        super(App, self).__init__()
         self.title = 'Criar Pasta'
 
         self.width = 800
@@ -20,16 +28,28 @@ class App(QWidget):
         self.vbox = QVBoxLayout()
         self.hbox = QHBoxLayout()
         self.list = QListWidget()
-        self.initUI()
+        self.parseArgs()
+
+
+    def parseArgs(self):
+        self.filelist = args.list
+        try:
+            if args.gui is True and len(self.filelist) > 0:
+                print('gui: ', self.filelist)
+                self.initUI()
+            elif args.fast is True and len(self.filelist) > 0:
+                print('fast: ', self.filelist)
+                pass
+        except Exception:
+            # print(Error)
+            pass
 
 
     def initUI(self):
         count = 0
-        for filename in sys.argv:
-            if not sys.argv[0] == filename:
-                self.list.insertItem(count, basename(filename).split('.')[0])
-                count + 1
-                pass
+        for filename in reversed(self.filelist):
+            self.list.insertItem(count, basename(filename).split('.')[0])
+            count + 1
             pass
 
         self.list.clicked.connect(self.listview_clicked)
@@ -37,7 +57,8 @@ class App(QWidget):
 
         self.button = QPushButton('Criar Pasta!')
         self.textbox = QLineEdit()
-        self.pasta = QLabel('Pasta:')
+        self.button.clicked.connect(self.makelist)
+        self.pasta = QLabel('Pasta: ')
         self.hbox.addWidget(self.textbox)
         self.hbox.addSpacing(10)
         self.hbox.addWidget(self.button)
@@ -57,17 +78,11 @@ class App(QWidget):
         self.textbox.setText(textboxValue)
 
 
-# def makelist(self):
+    def makelist(self):
+        item = self.list.currentItem()
+        textboxValue = str(item.text())
+        print(textboxValue)
 
-
-# # def editname(self):
-
-# #     pass
-
-
-# # def makedir(self):
-# #     pass
-  
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
