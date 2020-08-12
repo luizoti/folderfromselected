@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-from os.path import basename
+from os.path import basename, isdir
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QPushButton, QWidget, QApplication, QLabel, QListWidget, QHBoxLayout, QVBoxLayout, QLineEdit
  
@@ -51,13 +51,14 @@ class App(QWidget):
             count + 1
             pass
 
-        self.list.clicked.connect(self.listview_clicked)
-        self.list.itemSelectionChanged.connect(self.listview_clicked)
+        self.list.clicked.connect(self.textbox_change)
+        self.list.itemSelectionChanged.connect(self.textbox_change)
+        
         self.vbox.addWidget(self.list)
 
         self.button = QPushButton('Criar Pasta!')
         self.textbox = QLineEdit()
-        self.button.clicked.connect(self.makelist)
+        self.button.clicked.connect(self.create_folder)
         self.pasta = QLabel('Pasta: ')
         self.hbox.addWidget(self.textbox)
         self.hbox.addSpacing(10)
@@ -72,16 +73,17 @@ class App(QWidget):
         self.show()
 
 
-    def listview_clicked(self):
+    def textbox_change(self):
         item = self.list.currentItem()
         textboxValue = str(item.text())
         self.textbox.setText(textboxValue)
 
 
-    def makelist(self):
+    def create_folder(self):
         item = self.list.currentItem()
         textboxValue = str(item.text())
-        print(textboxValue)
+        if isdir():
+            pass
 
 
 if __name__ == '__main__':
