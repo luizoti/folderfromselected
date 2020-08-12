@@ -41,7 +41,6 @@ class App(QWidget):
                 print('fast: ', self.filelist)
                 pass
         except Exception:
-            # print(Error)
             pass
 
 
@@ -53,6 +52,7 @@ class App(QWidget):
             pass
 
         self.list.clicked.connect(self.listview_clicked)
+        self.list.itemSelectionChanged.connect(self.listview_clicked)
         self.vbox.addWidget(self.list)
 
         self.button = QPushButton('Criar Pasta!')
