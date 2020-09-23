@@ -14,4 +14,4 @@ Exec=/usr/bin/python3 /home/luiz/HD/posinstall/repos/folderfromselected/folderfr
 [Desktop Action FolderFromSelectedFast]
 Name=Nova pasta para seleção (rapido)
 Icon=Thunar
-Exec=/usr/bin/python3 /home/luiz/HD/posinstall/repos/folderfromselected/folderfromselected.py -f %F
+Exec=/usr/bin/python3 /home/luiz/HD/posinstall/repos/folderfromselected/folderfromselected.py -c %F
