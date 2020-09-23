@@ -12,7 +12,7 @@ from PyQt5.QtGui import QKeyEvent, QIcon, QKeySequence
 from PyQt5.Qt import QDir
 from PyQt5.QtWidgets import QPushButton, QWidget, QApplication, QLabel, QListWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QTreeView, QFileDialog, QShortcut
 
-realpath = os.path.dirname(os.path.realpath(__file__))
+realpath = join(os.path.dirname(os.path.realpath(__file__)), 'icos')
 parse = argparse.ArgumentParser(description='Create folder from selected files:')
 
 parse.add_argument('-c', '--cmd', nargs='+', metavar='filelist', help='CMD create folder')
