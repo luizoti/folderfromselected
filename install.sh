@@ -10,34 +10,42 @@ SCRIPT="${DIR}/folderfromselected.py"
 ICOS="${DIR}/icos"
 
 
-if [[ ! -d ${SERVICE_DIR} ]]; then
-    sudo -u ${USER} mkdir -p ${SERVICE_DIR}
-else
-    if [[ -f ${SERVICE} ]]; then
-        if sudo cp -f ${SERVICE} ${SERVICE_DIR}; then
-            echo "folderfromselected.desktop, copiado com sucesso!"
-        else
-            echo "folderfromselected.desktop, erro ao copiar!"
+function install(){
+    if [[ ! -d ${SERVICE_DIR} ]]; then
+        sudo mkdir -p ${SERVICE_DIR}
+    else
+        if [[ -f ${SERVICE} ]]; then
+            if sudo cp -f ${SERVICE} ${SERVICE_DIR}; then
+                echo "folderfromselected.desktop, copiado com sucesso!"
+            else
+                echo "folderfromselected.desktop, erro ao copiar!"
+            fi
         fi
     fi
-fi
-echo
-if [[ ! -d ${SCRIPT_DIR} ]]; then
-    sudo -u ${USER} mkdir -p ${SCRIPT_DIR}
-else
-    if [[ -f ${SCRIPT} ]]; then
-        if sudo -u ${USER} cp -f ${SCRIPT} ${SCRIPT_DIR}; then
-            echo "folderfromselected.py, copiado com sucesso!"
-        else
-            echo "folderfromselected.py, erro ao copiar!"
-        fi
-        echo
-        if sudo -u ${USER} cp -rf ${ICOS} ${SCRIPT_DIR}; then
-            echo "Pastade icones copiada, copiado com sucesso!"
-        else
-            echo "Pastade icones, erro ao copiar!"
+    echo
+    if [[ ! -d ${SCRIPT_DIR} ]]; then
+        sudo mkdir -p ${SCRIPT_DIR}
+    else
+        if [[ -f ${SCRIPT} ]]; then
+            if sudo cp -f ${SCRIPT} ${SCRIPT_DIR}; then
+                echo "folderfromselected.py, copiado com sucesso!"
+            else
+                echo "folderfromselected.py, erro ao copiar!"
+            fi
+            echo
+            if sudo cp -rf ${ICOS} ${SCRIPT_DIR}; then
+                echo "Pastade icones copiada, copiado com sucesso!"
+            else
+                echo "Pastade icones, erro ao copiar!"
+            fi
         fi
     fi
+}
+
+if [[ -f "/usr/bin/plasma_session" ]] && [[ ${DESKTOP_SESSION} == "plasma" ]]; then
+    install
+else
+    echo "Esse escript foi escrito para o KDE, caso esteja usando outro Desktop Enviroment, instale manualmente."
 fi
 
 exit
