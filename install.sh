@@ -24,21 +24,10 @@ function install(){
     fi
     echo
     if [[ ! -d ${SCRIPT_DIR} ]]; then
-        sudo mkdir -p ${SCRIPT_DIR}
+        sudo -u ${USER} git clone 'https://github.com/luizoti/folderfromselected.git' ${SCRIPT_DIR}
     else
-        if [[ -f ${SCRIPT} ]]; then
-            if sudo cp -f ${SCRIPT} ${SCRIPT_DIR}; then
-                echo "folderfromselected.py, copiado com sucesso!"
-            else
-                echo "folderfromselected.py, erro ao copiar!"
-            fi
-            echo
-            if sudo cp -rf ${ICOS} ${SCRIPT_DIR}; then
-                echo "Pastade icones copiada, copiado com sucesso!"
-            else
-                echo "Pastade icones, erro ao copiar!"
-            fi
-        fi
+        cd ${SCRIPT_DIR}
+        sudo -u ${USER} git pull origin master
     fi
 }
 
