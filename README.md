@@ -10,7 +10,7 @@ I tested only on KDE.
 
 # Install
 
-Clone the repo and run (whith no sudo) ./install.sh or sudo -E ./install.sh.
+Clone the repo and run (whith no sudo) ```./install.sh``` or ```sudo -E ./install.sh```.
 
 # Easy Install
 
