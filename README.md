@@ -14,4 +14,4 @@ Clone the repo and run (whith no sudo) ```./install.sh``` or ```sudo -E ./instal
 
 # Easy Install
 
-sudo wget -P '/tmp/' "https://raw.githubusercontent.com/luizoti/folderfromselected/master/install.sh" && sudo chmod +x /tmp/install.sh && sudo -E /tmp/install.sh -i
+```sudo wget -P '/tmp/' "https://raw.githubusercontent.com/luizoti/folderfromselected/master/install.sh" && sudo chmod +x /tmp/install.sh && sudo -E /tmp/install.sh -i```
