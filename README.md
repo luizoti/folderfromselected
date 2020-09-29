@@ -10,8 +10,8 @@ I tested only on KDE.
 
 # Install
 
-./install.sh
+Clone the repo and run (whith no sudo) ./install.sh or sudo -E ./install.sh.
 
-sudo -E ./install.sh.
+# Easy Install
 
-
+sudo wget -P '/tmp/' "https://raw.githubusercontent.com/luizoti/folderfromselected/master/install.sh" && sudo chmod +x /tmp/install.sh && sudo -E /tmp/install.sh -i
