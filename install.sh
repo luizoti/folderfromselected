@@ -29,6 +29,13 @@ else
     echo "Erro ao instalar pyqt5"
 fi
 
+echo "_____________ Instalando colorama _____________"
+if sudo pip3 install colorama; then
+    echo "Sucesso ao instalar colorama"
+else
+    echo "Erro ao instalar colorama"
+fi
+
 USER=$(id -un 1000)
 DIR=$(dirname "$(readlink -f "$0")")
 SERVICE_DIR=/home/${USER}/.local/share/kservices5/ServiceMenus
