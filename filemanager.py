@@ -18,12 +18,15 @@ args = parse.parse_args()
 
 
 def pprint(size, *args): # print the 3 message with colors, just informing pprint(4, message, color)
-    if size is None:
-        print('first argument "size" is required')
+
+    if type(size) is not int:
+        print('first argument is not a int nunber')
         pass
 
-    if len(args) < 1:
+    if len(args) == 1:
         print('Enter at least one message and one color.')
+    elif len(args) in [3, 5, 7]:
+        print('Please, give a color for last message')
     else:
         if len(args) == 2:
             print(size * ' ', colored(args[0], args[1], attrs=['bold']))
@@ -31,6 +34,7 @@ def pprint(size, *args): # print the 3 message with colors, just informing pprin
             print(size * ' ', colored(args[0], args[1], attrs=['bold']), colored(args[2], args[3], attrs=['bold']))
         elif len(args) == 6:
             print(size * ' ', colored(args[0], args[1], attrs=['bold']), colored(args[2], args[3], attrs=['bold']), colored(args[4], args[5], attrs=['bold']))
+
 
 class FilesManager():
     def __init__(self):
