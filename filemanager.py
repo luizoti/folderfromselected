@@ -62,13 +62,18 @@ class FilesManager():
                 pprint(4, 'The directory', 'white', newdir, 'green', 'already exists.', 'white')
             elif isfile(self.pathtomovefiles) is True: # check if newdir is a file
                 pprint(4, 'The directory', 'white', newdir, 'blue', 'and its a', 'white', 'file.', 'blue')
-                tmp_dir = join([self.current_dir_of_files, 'tmp_dir']) 
+                tmp_dir = join(self.current_dir_of_files, 'tmp_dir') 
 
                 # create a tmp dir
-                try:
-                    mkdir(tmp_dir)
-                except Exception as e:
-                    raise e
+                if not isdir(tmp_dir):
+                    pprint('tmp_dir', 'green' 'not exist')
+                    try:
+                        mkdir(tmp_dir)
+                    except Exception as e:
+                        raise e
+                else:
+                    pprint('tmp_dir', 'green' 'created')
+                    pass
 
                 # check content of var tmp_dir
                 if len(tmp_dir) > 0: # check if tmp_dir is a valid dir
