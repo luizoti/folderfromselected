@@ -96,13 +96,13 @@ class FilesManager():
                             #
                             # checks if the file has been successfully moved
                             if isfile(join(_dir, basename(file))) is True or isdir(join(_dir, basename(file))) is True:
-                                pprint(4, basename(file), 'blue', 'successfully moved to', 'white', file, 'green')
+                                pprint(4, basename(file), 'blue', 'successfully moved to', 'white', _dir, 'green')
                             else:
                                 pprint(4, basename(file), 'red', 'error when moving', 'white', file, 'red')
                 except Exception as e:
                     raise e
         if self.tmp_dir is not None and isdir(self.tmp_dir) is True: # if tmp_dir is a valid directory, move files to it
-            pprint(4, 'Creating the temporary directory', 'white', tmp_dir, 'red')
+            pprint(4, 'Creating the temporary directory', 'white', self.tmp_dir, 'red')
             doMove(_filelist, self.tmp_dir)
             try:
                 rename(self.tmp_dir, self.pathtomovefiles) # rename tmp_dir to delected dir 
