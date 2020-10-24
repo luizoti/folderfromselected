@@ -10,18 +10,18 @@ from os import listdir, mkdir, rename, rmdir
 from os.path import basename, dirname, isfile, isdir, join
 from shutil import move as mvfiles
 
-
 parse = argparse.ArgumentParser(description='Create folder from selected files:')
-
-parse.add_argument('-f', '--filelist', nargs='+', metavar='filelist', help='CMD create folder', required=True)
-parse.add_argument('-d', '--dir', metavar='newdir', help='Name of new dir to create', required=True)
+parse.add_argument('-f', '--filelist', nargs='+', metavar='filelist', help='CMD create folder')
+parse.add_argument('-d', '--dir', metavar='newdir', help='Name of new dir to create')
 parse.add_argument('-m', '--move', metavar='pathtomove', help='Name of new path to move')
 args = parse.parse_args()
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-
 
 def pprint(size, *args): # print the 3 message with colors, just informing pprint(4, message, color)
+    if size is None:
+        print('first argument "size" is required')
+        pass
+
     if len(args) < 1:
         print('Enter at least one message and one color.')
     else:
@@ -32,7 +32,7 @@ def pprint(size, *args): # print the 3 message with colors, just informing pprin
         elif len(args) == 6:
             print(size * ' ', colored(args[0], args[1], attrs=['bold']), colored(args[2], args[3], attrs=['bold']), colored(args[4], args[5], attrs=['bold']))
 
-class ManageFiles():
+class FilesManager():
     def __init__(self):
         pprint(2, 'CMD folderfromselected', 'yellow')
 
@@ -132,13 +132,22 @@ class ManageFiles():
 
 
 if __name__ == '__main__':
-    mf = ManageFiles()
+    mf = FilesManager()
 
-    if len(args.dir) > 0 and len(args.filelist) >= 1:
-        mf.createNewDir(args.dir, args.filelist)
+    if args.dir is not None:
+        if len(args.dir) > 0 and len(args.filelist) >= 1:
+            mf.createNewDir(args.dir, args.filelist)
 
-    if len(args.filelist) >= 1:
-        mf.movefiles(args.filelist)
+    else:
+        pprint(4, '-d, --dir', 'red', 'is a required argument', 'white')
+        pass
+
+    if args.filelist is not None:
+        if len(args.filelist) >= 1:
+            mf.movefiles(args.filelist)
+    else:
+        pprint(4, '-f, --filelist', 'red', 'is a required argument', 'white')
+        pass
     
     if args.move is not None and len(args.dir) > 0 and len(args.filelist) >= 1:
         if len(args.move) > 0:
