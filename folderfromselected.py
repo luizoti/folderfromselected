@@ -1,37 +1,68 @@
 #!/usr/bin/python3
 
 import os
-import sys
+from os.path import join, basename
+
 import argparse
 
-from os import mkdir, rmdir, listdir, rename
-from os.path import basename, isfile, isdir, join, dirname
-from shutil import copytree, move, Error as sterr
-
-from PyQt5.QtGui import QKeyEvent, QIcon, QKeySequence
 from PyQt5.Qt import QDir
-from PyQt5.QtWidgets import QPushButton, QWidget, QApplication, QLabel, QListWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QTreeView, QFileDialog, QShortcut
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtGui import QKeyEvent, QIcon, QKeySequence
 
-realpath = join(os.path.dirname(os.path.realpath(__file__)), 'icos')
+from PyQt5.QtWidgets import QApplication, QWidget, QListWidget, QDesktopWidget
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QPushButton, QCheckBox, QLineEdit, QTreeView, QFileDialog, QShortcut
+from PyQt5.QtWidgets import QLabel
+
+from filemanager import FilesManager
+
 parse = argparse.ArgumentParser(description='Create folder from selected files:')
-
-parse.add_argument('-c', '--cmd', nargs='+', metavar='filelist', help='CMD create folder')
-parse.add_argument('-g', '--gui', nargs='+', metavar='filelist', help='GUI create folder')
-parse.add_argument('-d', '--dir', metavar='dirname', help='Name of dir for CMD')
-parse.add_argument('-m', '--move', metavar='movepath', help='Path to move created dir')
+parse.add_argument('-f', '--filelist', nargs='+', metavar='filelist', help='CMD create folder', required=True)
 args = parse.parse_args()
 
-# 
-# 
-class NewPathLine(QLineEdit):
+current_dir = os.path.dirname(os.path.realpath(__file__))
+# # # 
+# # # 
+def GetIcon(iconame):
+    return QIcon(join(current_dir, 'icos', iconame))
+
+class CurrentResolution(QDesktopWidget):
+    def __init__(self):
+        QDesktopWidget.__init__(self)
+        self.screenGeometry(-1)
+        self.height()
+        self.width()
+
+class ButtonsLayout(QHBoxLayout):
+    def __init__(self):
+        QHBoxLayout.__init__(self)
+        self.clear = QPushButton('Limpar')
+        self.create = QPushButton('Criar')
+
+        self.addWidget(self.clear)
+        self.addWidget(self.create)
+
+class NewPathBox(QLineEdit):
     def __init__(self, parent):
-        super(NewPathLine, self).__init__(parent)
+        super(NewPathBox, self).__init__(parent)
         self.parentWindow = parent
         self.label = 'Digite o caminho para mover a pasta'
         self.setPlaceholderText(self.label)
         self.setStyleSheet("color: #7d7d7d")
         self.setEnabled(False)
 
+        self.SearchBtnInside = QPushButton()
+        self.SearchBtnInside.setIcon(GetIcon('find.svg'))
+        # self.SearchBtnInside.setFixedSize(30, 30)
+        self.SearchBtnInside.setStyleSheet('');
+        self.SearchBtnInside.setCursor(Qt.ArrowCursor)
+        self.SearchBtnInside.setEnabled(True)
+        self.SearchBtnInside.clicked.connect(self.folderdiag)
+
+        self.lay = QHBoxLayout()
+        self.lay.addStretch(1)
+        self.lay.addWidget(self.SearchBtnInside)
+        self.setLayout(self.lay)
 
     def folderdiag(self):
         diag = QFileDialog()
@@ -45,6 +76,18 @@ class NewPathLine(QLineEdit):
                 pass
             pass
 
+    def EnablePathTextBox(self, state):
+        if state is True:
+            self.setEnabled(state)
+            self.SearchBtnInside.setEnabled(state)
+            self.setStyleSheet("color: white")
+        elif state is False:
+            self.setEnabled(state)
+            self.SearchBtnInside.setEnabled(state)
+            self.setStyleSheet("color: #7d7d7d")
+            pass
+        pass
+        self.setPlaceholderText(self.label)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() in [16777234, 16777236] and self.label in self.text():
@@ -53,16 +96,15 @@ class NewPathLine(QLineEdit):
             super().keyPressEvent(event)
             pass
         self.parentWindow.keyPressEvent(event)
-# 
-# 
-# 
+
+
 class FileTextbox(QLineEdit):
     def __init__(self, parent):
         super(FileTextbox, self).__init__(parent)
         self.parentWindow = parent
         self.label = 'Digite o nome da pasta'
         self.setPlaceholderText(self.label)
-
+        self.setFixedWidth(480)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() in [16777234, 16777236] and self.label in self.text():
@@ -73,106 +115,110 @@ class FileTextbox(QLineEdit):
         self.parentWindow.keyPressEvent(event)
 
 
-class App(QWidget):
+class ListWidget(QListWidget):
     def __init__(self):
-        super(App, self).__init__()
-        self.mk = ManageFiles()
-        self.title = 'Criar Pasta!'
-        self.setWindowIcon(QIcon(join(realpath, 'folder.svg')))
+        QHBoxLayout.__init__(self)
+        self.injectItemToList()
 
-        self.EnterKey = QShortcut(QKeySequence("Enter"), self)
-        self.ExitKey = QShortcut(QKeySequence("Esc"), self)
 
-        self.ExitKey.activated.connect(self.close)
-        self.EnterKey.activated.connect(lambda: print("Hey Hey"))
-
-        self.width, self.height = 500, 400
-        self.left = round(int((size.width() - self.width)/ 2))
-        self.top = round(int((size.height() - self.height + 40) / 2))
-        self.setFixedSize(self.width, self.height)
-        #  
-        self.vbox_primary = QVBoxLayout()
-        # 
-        self.textbox_layout_hoziontal = QHBoxLayout()
-        self.textpath_layout_hoziontal = QHBoxLayout()
-        self.buttons_hoziontal = QHBoxLayout()
-
-        self.list = QListWidget()
-        # 
-        self.checkmove = QCheckBox()
-        self.checkmove.setIcon(QIcon(join(realpath, 'lock.svg')))
-        self.search = QPushButton()
-        self.search.setIcon(QIcon(join(realpath, 'find.svg')))
-        self.search.setFixedSize(30, 30)
-        self.search.setEnabled(False)
-        self.clear = QPushButton('Limpar')
-        self.create = QPushButton('Criar')
-
-        self.filetextbox = FileTextbox(self)
-        self.pathtextbox = NewPathLine(self)
-        
-        self.filetextbox.setFixedWidth(480)
-        self.initUI()
-        
-
-    def initUI(self):
+    def injectItemToList(self):
         count = 0
-        for filename in reversed(listfiles):
-            self.list.insertItem(count, basename(filename).split('.')[0])
+        
+        for filename in reversed(args.filelist):
+            self.insertItem(count, basename(filename).split('.')[0])
             count + 1
             pass
-        # 
-        self.list.clicked.connect(self.current_selected and self.filetextbox_change)
-        self.list.itemSelectionChanged.connect(self.current_selected and self.filetextbox_change)
-        self.search.clicked.connect(lambda: self.pathtextbox.folderdiag())
-        self.checkmove.stateChanged.connect(lambda: self.enable_pathtextbox(self.pathtextbox.isEnabled()))
-        self.create.clicked.connect(self.folder_action)
 
-        self.clear.clicked.connect(self.clearact)
-        self.vbox_primary.addWidget(self.list)
-        self.textbox_layout_hoziontal.addWidget(self.filetextbox)
-        self.textpath_layout_hoziontal.addWidget(self.pathtextbox)
-        self.textbox_layout_hoziontal.addSpacing(200)
-        self.textpath_layout_hoziontal.addWidget(self.search)
-        self.textpath_layout_hoziontal.addWidget(self.checkmove)
-        self.buttons_hoziontal.addWidget(self.clear)
-        self.buttons_hoziontal.addWidget(self.create)
-        self.vbox_primary.addLayout(self.textpath_layout_hoziontal)
-        self.vbox_primary.addLayout(self.textbox_layout_hoziontal)
-        self.vbox_primary.addLayout(self.buttons_hoziontal)
-        self.setLayout(self.vbox_primary)
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-        self.show()
+    def current_selected(self):
+        item = self.currentItem()
+        return str(item.text())
 
+class CheckBox(QCheckBox):
+    def __init__(self):
+        super(CheckBox, self).__init__()
+        self.ChangeIco()
+        self.stateChanged.connect(self.ChangeIco)
+        
 
-    def enable_pathtextbox(self, state):
-        if state is False:
-            self.checkmove.setIcon(QIcon(join(realpath, 'unlock.svg')))
-            self.pathtextbox.setEnabled(True)
-            self.search.setEnabled(True)
-            self.pathtextbox.setStyleSheet("color: white")
-        elif state is True:
-            self.checkmove.setIcon(QIcon(join(realpath, 'lock.svg')))
-            self.pathtextbox.setEnabled(False)
-            self.search.setEnabled(False)
-            self.pathtextbox.setStyleSheet("color: #7d7d7d")
+    def ChangeIco(self):
+        if self.isChecked() is False:
+            self.setIcon(GetIcon('lock.svg'))
+        else:
+            self.setIcon(GetIcon('unlock.svg'))
             pass
         pass
-        self.pathtextbox.setPlaceholderText(self.pathtextbox.label)
+
+class AppGui(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        self.fm = FilesManager
+        self.appSize() # App Dimensions and position 
+        # self.setStyleSheet(open(join(current_dir, 'stylesheet.css'),"r").read())
+        self.setWindowTitle('Create folder')
+        self.setWindowIcon(GetIcon('folder.svg'))
+        # Global Keys
+        self.EnterKey = QShortcut(QKeySequence("Enter"), self)
+        self.ExitKey = QShortcut(QKeySequence("Esc"), self)
+        self.ExitKey.activated.connect(self.close)
+        self.EnterKey.activated.connect(lambda: print("Hey Hey"))
+        # Widgets
+        self.checkMove = CheckBox()
+        self.buttonlaybar = ButtonsLayout()
+        self.listwidget  = ListWidget()
+        self.filetextbox = FileTextbox(self)
+        self.pathtextbox = NewPathBox(self)
+        # Base Layouts
+        self.primaryLayout = QVBoxLayout()
+        self.subLayTextBoxHorizontal = QHBoxLayout()
+        self.subLayTextPathHorizontal = QHBoxLayout()
+        self.baseCMD()
+        self.UIOrdererInit()
+        self.show()
+        
+
+    def appSize(self):
+        self.resolution = CurrentResolution()
+        self.width, self.height = 500, 400
+        self.left = round(int((self.resolution.width() - self.width)/ 2))
+        self.top = round(int((self.resolution.height() - self.height + 40) / 2))
+        self.setFixedSize(QSize(self.width, self.height))
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
 
-    def folder_action(self):
+    def baseCMD(self):
+        self.checkMove.stateChanged.connect(lambda: self.pathtextbox.EnablePathTextBox(self.checkMove.isChecked()))
+ 
+        self.buttonlaybar.clear.clicked.connect(self.clearFileTextBox)
+        self.buttonlaybar.create.clicked.connect(self.createDirAction)
+
+        self.listwidget.clicked.connect(self.changeFileTextBox)
+        self.listwidget.itemSelectionChanged.connect(self.changeFileTextBox)
+        pass
+
+
+    def UIOrdererInit(self):
+        self.primaryLayout.addWidget(self.listwidget)
+
+        self.subLayTextBoxHorizontal.addWidget(self.filetextbox)
+        self.subLayTextPathHorizontal.addWidget(self.pathtextbox)
+        self.subLayTextBoxHorizontal.addSpacing(200)
+        self.subLayTextPathHorizontal.addWidget(self.checkMove)
+
+        self.primaryLayout.addLayout(self.subLayTextPathHorizontal)
+        self.primaryLayout.addLayout(self.subLayTextBoxHorizontal)
+        self.primaryLayout.addLayout(self.buttonlaybar)
+        self.setLayout(self.primaryLayout)
+
+
+    def createDirAction(self):
         if self.pathtextbox.isEnabled() is True:
             self.pathtextbox.clear()
             self.pathtextbox.setPlaceholderText(self.pathtextbox.label)
-            pass
 
-        if len(self.filetextbox.text()) == 0:
+        if len(self.filenameetextbox.text()) == 0:
             self._dir = listfiles[0].split('.')[0]            
         else:
             self._dir = join(dirname(listfiles[0].split('.')[0]), self.filetextbox.text())
-            pass
         
         try:
             self.mk.makedir(self._dir)
@@ -181,130 +227,21 @@ class App(QWidget):
 
         self.close()
 
-    def current_selected(self):
-        item = self.list.currentItem()
-        return str(item.text())
 
-
-    def filetextbox_change(self):
+    def changeFileTextBox(self):
         self.filetextbox.setStyleSheet("color: white")
-        self.filetextbox.setText(self.current_selected())
+        self.filetextbox.setText(self.listwidget.current_selected())
 
 
-    def clearact(self):
+    def clearFileTextBox(self):
         self.filetextbox.clear()
         self.filetextbox.setPlaceholderText(self.filetextbox.label)
         # 
-
-
-class ManageFiles():
-    def __init__(self):
-        print(' Gerenciador de Arquivos')
-
-
-    def makedir(self, dirpath):
-        self.dir = dirpath
-
-        if isdir(self.dir):
-            print(f' Pasta já existe: {self.dir}')
-            # 
-            try:
-                self.movefiles()
-            except Exception as e:
-                raise e
-        elif isfile(self.dir) or not isdir(self.dir):
-            print(f'  É um arquivo ou não existe: {self.dir}')
-            olddir = self.dir
-            self.dir = self.dir + '1'
-
-            try:
-                mkdir(self.dir)
-                self.movefiles()
-                rename(self.dir, olddir)
-            except Exception as MkdirE:
-                raise MkdirE
-                pass
-            pass
-
-
-    def movefiles(self):
-        print()
-        print('Movendo arquivos:')
-        for file in listfiles:
-            try:
-                move(file, self.dir)
-                print(f' Arquivo movido, {file}')
-            except sterr as Fexist:
-                print(f' {Fexist.args[0]}, ignorado.')
-            except FileNotFoundError as NotF:
-                print(f' Arquivo não existe: {file}')
-            pass
-
-
-    def newpath(self, newpath):
-        src_dir = dirname(_dir)
-        dest_dir = join(newpath, basename(_dir))
-        # 
-        print()
-        print(f'Movendo {_dir} para {newpath}.')
-
-        def move_act():
-            for file in listdir(_dir):
-                file = join(_dir, file)
-                if isfile(file):
-                    if isdir(dest_dir):
-                        print(f'  Arquivo {file}, copiado para {dest_dir}.')
-                        move(file, dest_dir)
-
-        try:
-            if isdir(newpath):
-                if newpath == src_dir:
-                    print(f' Diretorio {src_dir} é igual a {dest_dir}.')
-                else:
-                    print(f' Movendo arquivos para {dest_dir}.')
-                    if not isdir(dest_dir):
-                        print(f' Diretorio {dest_dir}, criado!')
-                        mkdir(dest_dir)
-                    pass
-                    # 
-                    move_act()
-                    # 
-                    if len(listdir(_dir)) == 0:
-                        rmdir(_dir)
-                        print()
-                        print(f' Diretorio {_dir}, apagado.')
-                        pass
-                        # 
-            else:
-                print(f'Diretorio {newpath} não existe!')
-                pass
-        except Exception as e:
-            raise e
-        pass
+    pass
 
 
 if __name__ == '__main__':
-    if args.gui is not None:
-        print('Graphical Interface Mode')
-        listfiles = args.gui
-        app = QApplication(sys.argv)
-        screen = app.primaryScreen()
-        size = screen.size()
-        App()
-        sys.exit(app.exec_())
-    elif args.cmd is not None:
-        print('Command Line Interface')
-        listfiles = args.cmd
-        # 
-        if args.dir:
-            _dir = join(dirname(listfiles[0].split('.')[0]), args.dir)
-        else:
-            _dir = listfiles[0].split('.')[0]
-            pass
-
-        mk = ManageFiles()
-        mk.makedir(_dir)
-        if args.move is not None:
-            mk.newpath(args.move)
-            pass
-        pass
+    MainEventThread = QApplication(['AppGui'])
+    MainApp = AppGui()
+    MainApp.show()
+    MainEventThread.exec()
