@@ -70,13 +70,13 @@ class FilesManager():
 
                 # create a tmp dir
                 if not isdir(tmp_dir):
-                    pprint('tmp_dir', 'green' 'not exist')
+                    pprint('tmp_dir', 'green', 'not exist', 'white')
                     try:
                         mkdir(tmp_dir)
                     except Exception as e:
                         raise e
                 else:
-                    pprint('tmp_dir', 'green' 'created')
+                    pprint('tmp_dir', 'green', 'created', 'white')
                     pass
 
                 # check content of var tmp_dir
@@ -85,6 +85,7 @@ class FilesManager():
                         self.tmp_dir = tmp_dir
                     else:
                         self.tmp_dir = None
+        return {'src': self.current_dir_of_files, 'dest': self.pathtomovefiles, 'tmp': self.tmp_dir}
 
     def movefiles(self, _filelist):
         def doMove(__filelist, _dir): # func to move files based in a filelist and dir
@@ -97,6 +98,8 @@ class FilesManager():
                             # checks if the file has been successfully moved
                             if isfile(join(_dir, basename(file))) is True or isdir(join(_dir, basename(file))) is True:
                                 pprint(4, basename(file), 'blue', 'successfully moved to', 'white', _dir, 'green')
+                            elif file == _dir:
+                                pprint(4, basename(file), 'blue', 'is a dir and will be used to place the files', 'white', dirname(file), 'red')
                             else:
                                 pprint(4, basename(file), 'red', 'error when moving', 'white', file, 'red')
                 except Exception as e:
